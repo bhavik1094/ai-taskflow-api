@@ -1,0 +1,12 @@
+.git
+.github
+.vs
+artifacts
+bin
+obj
+**/bin
+**/obj
+*.user
+*.log
+api-run.out.log
+api-run.err.log
