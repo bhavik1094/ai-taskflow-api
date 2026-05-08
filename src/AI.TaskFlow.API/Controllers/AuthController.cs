@@ -1,5 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using AI.TaskFlow.API.Extensions;
 using AI.TaskFlow.Application.Common;
 using AI.TaskFlow.Application.DTOs;
 using AI.TaskFlow.Application.Interfaces;
@@ -53,10 +52,7 @@ public sealed class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<ActionResult<ApiResponse<UserProfileDto>>> Me(CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ??
-                          User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (!Guid.TryParse(userIdClaim, out var userId))
+        if (!User.TryGetAuthenticatedUserId(out var userId))
         {
             return Unauthorized(ApiResponse<UserProfileDto>.Failure("User is not authenticated.", "Missing or invalid user id claim."));
         }

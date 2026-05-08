@@ -1,3 +1,4 @@
+using AI.TaskFlow.API.Extensions;
 using AI.TaskFlow.Application.Common;
 using AI.TaskFlow.Application.DTOs;
 using AI.TaskFlow.Application.Interfaces;
@@ -40,6 +41,11 @@ public sealed class TasksController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TaskDto>> Create(CreateTaskRequest request, CancellationToken cancellationToken)
     {
+        if (!request.AssignedToUserId.HasValue && User.TryGetAuthenticatedUserId(out var currentUserId))
+        {
+            request.AssignedToUserId = currentUserId;
+        }
+
         var response = await _taskService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
     }

@@ -57,7 +57,7 @@ public sealed class ProjectService : IProjectService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<ProjectDto> CreateAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
+    public async Task<ProjectDto> CreateAsync(CreateProjectRequest request, Guid ownerId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
         {
@@ -65,18 +65,18 @@ public sealed class ProjectService : IProjectService
         }
 
         var owner = await _dbContext.Users
-            .FirstOrDefaultAsync(x => x.Id == request.OwnerId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == ownerId, cancellationToken);
 
         if (owner is null)
         {
-            throw new KeyNotFoundException("Project owner was not found.");
+            throw new KeyNotFoundException($"Project owner was not found for user id '{ownerId}'.");
         }
 
         var project = new Project
         {
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
-            OwnerId = request.OwnerId,
+            OwnerId = ownerId,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             CreatedBy = owner.Email

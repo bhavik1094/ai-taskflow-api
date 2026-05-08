@@ -1,3 +1,4 @@
+using AI.TaskFlow.API.Extensions;
 using AI.TaskFlow.Application.Common;
 using AI.TaskFlow.Application.DTOs;
 using AI.TaskFlow.Application.Interfaces;
@@ -33,7 +34,14 @@ public sealed class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> Create(CreateProjectRequest request, CancellationToken cancellationToken)
     {
-        var response = await _projectService.CreateAsync(request, cancellationToken);
+        if (!User.TryGetAuthenticatedUserId(out var currentUserId))
+        {
+            return Unauthorized(ApiResponse<ProjectDto>.Failure(
+                "User is not authenticated.",
+                "Missing or invalid user id claim. Expected one of: nameidentifier, sub, userId."));
+        }
+
+        var response = await _projectService.CreateAsync(request, currentUserId, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
     }
 
