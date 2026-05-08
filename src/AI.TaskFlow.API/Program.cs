@@ -47,17 +47,27 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.MapScalarApiReference("/scalar", options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference("/scalar", options =>
-    {
-        options
-            .WithTitle("AI.TaskFlow API")
-            .WithTheme(ScalarTheme.BluePlanet)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
-}
+    options
+        .WithTitle("AI.TaskFlow API")
+        .WithTheme(ScalarTheme.BluePlanet)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
+
+app.MapGet("/", () => Results.Ok(new
+{
+    name = "AI.TaskFlow API",
+    status = "running",
+    docs = "/scalar",
+    openApi = "/openapi/v1.json"
+}));
+
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "healthy"
+}));
 
 using (var scope = app.Services.CreateScope())
 {
